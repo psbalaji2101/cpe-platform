@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "cluster_id": "synthetic-demo",
+  "components": [
+    {
+      "id": "demo.processor",
+      "namespace": "demo",
+      "pod_names": [
+        "processor-0"
+      ],
+      "containers": [
+        "processor"
+      ],
+      "kubernetes_log_patterns": [
+        "kubernetes/processor-0/*"
+      ],
+      "product_log_patterns": [
+        "processor*.log"
+      ],
+      "service_refs": [
+        {
+          "namespace": "demo",
+          "name": "processor"
+        }
+      ]
+    },
+    {
+      "id": "demo.storage",
+      "namespace": "demo",
+      "pod_names": [
+        "storage-0"
+      ],
+      "containers": [
+        "storage"
+      ],
+      "kubernetes_log_patterns": [
+        "kubernetes/storage-0/*"
+      ],
+      "product_log_patterns": [
+        "storage*.log"
+      ],
+      "service_refs": [
+        {
+          "namespace": "demo",
+          "name": "storage-api"
+        }
+      ]
+    }
+  ],
+  "archive_path_mappings": [
+    {
+      "nfs_export": "/customer-logs",
+      "archive_prefix": "nfs/"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+.DS_Store
+*.tsbuildinfo
+.venv/
+node_modules/
+dist/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.db
+data/
+playwright-report/
+test-results/
+LOCAL_ACCESS.md

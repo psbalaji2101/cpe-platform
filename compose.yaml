@@ -1,0 +1,74 @@
+name: cpe-evidence
+x-app: &app
+  build: ./backend
+  environment: &env
+    CPE_DATABASE_URL: postgresql+psycopg://cpe_runtime:${CPE_RUNTIME_PASSWORD:?Run scripts/configure.py}@postgres:5432/cpe
+    CPE_DATA_DIR: /data
+    CPE_ORIGIN: ${CPE_ORIGIN:-http://localhost:8097}
+    CPE_SECURE_COOKIES: ${CPE_SECURE_COOKIES:-false}
+    CPE_ADMIN_EMAIL: ${CPE_ADMIN_EMAIL:-admin@cpe.local}
+    CPE_LLM_PROVIDER: ${CPE_LLM_PROVIDER:-mock}
+    CPE_LLM_BASE_URL: ${CPE_LLM_BASE_URL:-}
+    CPE_LLM_API_KEY: ${CPE_LLM_API_KEY:-}
+    CPE_LLM_MODEL: ${CPE_LLM_MODEL:-}
+    CPE_LLM_ALLOWED_HOSTS: ${CPE_LLM_ALLOWED_HOSTS:-}
+    CPE_LLM_ALLOW_HTTP: ${CPE_LLM_ALLOW_HTTP:-false}
+    CPE_RECOVERY_DAYS: ${CPE_RECOVERY_DAYS:-7}
+  volumes: [artifacts:/data]
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  restart: unless-stopped
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: cpe
+      POSTGRES_USER: cpe
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes: [database:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U cpe -d cpe"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  migrate:
+    <<: *app
+    environment:
+      <<: *env
+      CPE_DATABASE_URL: postgresql+psycopg://cpe:${POSTGRES_PASSWORD}@postgres:5432/cpe
+      CPE_RUNTIME_PASSWORD: ${CPE_RUNTIME_PASSWORD}
+      CPE_ADMIN_PASSWORD: ${CPE_ADMIN_PASSWORD:?Run scripts/configure.py}
+    command: sh -c 'alembic upgrade head && python -m cpe.bootstrap'
+    depends_on:
+      postgres: {condition: service_healthy}
+    restart: "no"
+  api:
+    <<: *app
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+  worker:
+    <<: *app
+    command: python -m cpe.worker
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  web:
+    build: ./frontend
+    ports: ["127.0.0.1:${CPE_PORT:-8097}:8080"]
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: [CMD-SHELL, "wget -q -O /dev/null http://127.0.0.1:8080/api/health"]
+      interval: 15s
+      retries: 5
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+volumes:
+  database:
+  artifacts:

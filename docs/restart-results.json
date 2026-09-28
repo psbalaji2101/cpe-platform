@@ -1,0 +1,7 @@
+{
+  "session_survived": true,
+  "file_manifest_unchanged": true,
+  "approved_report_sha256_unchanged": true,
+  "files": 8,
+  "scope": "Application container restart; not database disaster recovery or interrupted-job recovery"
+}

@@ -1,0 +1,10 @@
+{
+  "compressed_bytes": 67108498,
+  "expanded_bytes": 67108354,
+  "records": 130561,
+  "upload_seconds": 0.669,
+  "ingestion_total_seconds": 8.75,
+  "tail_window_seconds": 0.0124,
+  "archive": "ZIP_STORED",
+  "scope": "64 MiB synthetic single-file test. Does not qualify 6 GB archives or model analysis."
+}

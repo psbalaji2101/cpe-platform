@@ -1,0 +1,12 @@
+{
+  "archive_bytes": 6442451204,
+  "expanded_bytes": 6442450944,
+  "records": 1572864,
+  "record_bytes": 4096,
+  "upload_seconds": 70.178,
+  "ingestion_total_seconds": 634.775,
+  "tail_window_seconds": 0.0152,
+  "archive": "ZIP_STORED",
+  "case_id": "beca190873444983ac43868b68a46a27",
+  "scope": "6144 MiB synthetic single-file upload/index test. Repetitive synthetic records are not representative customer diagnostics or model analysis."
+}
